@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LayoutDemos</string>
+
+    <string name="title_activity_list_view_test">ListViewTest</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+</resources>
