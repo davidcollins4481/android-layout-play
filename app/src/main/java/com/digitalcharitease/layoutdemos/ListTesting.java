@@ -54,7 +54,7 @@ public class ListTesting extends AppCompatActivity {
         events = (ListView) findViewById(R.id.mylist);
         String[] items = new String[] {"one", "two", "three"};
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_2, items);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
 
         events.setAdapter(adapter);
         events.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -96,7 +96,9 @@ public class ListTesting extends AppCompatActivity {
         int i = 0;
         while (i < top.length) {
             Map<String, String> map = new HashMap<>();
-            map.put(top[i], bottom[i]);
+            map.put("top", top[i]);
+            map.put("bottom", bottom[i]);
+
             list.add(map);
             i++;
         }
