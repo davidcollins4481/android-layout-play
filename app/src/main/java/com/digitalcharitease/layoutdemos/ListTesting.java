@@ -45,6 +45,9 @@ public class ListTesting extends AppCompatActivity {
             case 2:
                 this.listItemsSimpleTwo();
                 break;
+            case 3:
+                this.listItemsCustom();
+                break;
             default:
                 this.listItemsSimpleOne();
         }
@@ -86,6 +89,46 @@ public class ListTesting extends AppCompatActivity {
         }
     }
 
+    private void listItemsCustom() {
+        events = (ListView) findViewById(R.id.mylist);
+        String[] items = new String[] {"one", "two", "three"};
+        String[] subItems = new String[] {"under one lorem ips", "under two", "under three"};
+        String[] from = { "title", "description" };
+        int[] to = { R.id.title, R.id.description };
+
+        ArrayList<Map<String, String>> adapterItems;
+
+        try {
+            adapterItems = listCustomItems(items, subItems);
+            SimpleAdapter adapter = new SimpleAdapter(this, adapterItems, R.layout.row, from, to);
+            events.setAdapter(adapter);
+
+        } catch (Exception e) {
+            // do nothing
+            Log.d("ListTesting", e.getMessage());
+        }
+    }
+
+    private ArrayList<Map<String, String>> listCustomItems(String[] top, String[] bottom) throws Exception {
+        if (top.length != bottom.length) {
+            throw new Exception("List need to be the same size for simple list two");
+        }
+
+        ArrayList<Map<String, String>> list = new ArrayList<>();
+
+        int i = 0;
+        while (i < top.length) {
+            Map<String, String> map = new HashMap<>();
+            map.put("title", top[i]);
+            map.put("description", bottom[i]);
+
+            list.add(map);
+            i++;
+        }
+
+        return list;
+    }
+
     private ArrayList<Map<String, String>> listTwoItems(String[] top, String[] bottom) throws Exception {
         if (top.length != bottom.length) {
             throw new Exception("List need to be the same size for simple list two");
@@ -105,5 +148,6 @@ public class ListTesting extends AppCompatActivity {
 
         return list;
     }
+
 
 }

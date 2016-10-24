@@ -10,6 +10,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button listViewButtonOne;
     Button listViewButtonTwo;
+    Button listViewButtonThree;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
         listViewButtonOne = (Button) findViewById(R.id.list_view_button_1);
         listViewButtonTwo = (Button) findViewById(R.id.list_view_button_2);
+        listViewButtonThree = (Button) findViewById(R.id.list_view_button_3);
 
         final Context current = this;
 
@@ -33,5 +35,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        listViewButtonThree.setOnClickListener((v) -> {
+            Intent intent = new Intent(current, ListTesting.class);
+            intent.putExtra("type", 3);
+            startActivity(intent);
+        });
     }
 }
