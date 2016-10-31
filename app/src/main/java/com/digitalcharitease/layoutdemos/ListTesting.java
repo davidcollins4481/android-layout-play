@@ -1,8 +1,10 @@
 package com.digitalcharitease.layoutdemos;
 import android.content.Context;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -27,15 +29,18 @@ import java.util.Map;
 public class ListTesting extends AppCompatActivity {
     private final int MY_PERMISSIONS_REQUEST_READ_CALENDAR = 1;
     private ListView events;
-    RequestQueue requestQueue;
+    private RequestQueue requestQueue;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_testing);
 
         Bundle b = getIntent().getExtras();
         int type = b.getInt("type");
+
+        setContentView(type == 4 ? R.layout.swipe_update_list : R.layout.activity_list_testing);
+        swipeRefreshLayout = (SwipeRefreshLayout) this.findViewById(R.id.swipe_update_list);
 
         switch (type) {
             case 1:
@@ -122,6 +127,17 @@ public class ListTesting extends AppCompatActivity {
     }
 
     private void asyncSimpleList() {
+        updateStockQuotes();
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateStockQuotes();
+            }
+        });
+    }
+
+    private void updateStockQuotes() {
         final Context current = this;
         requestQueue = Volley.newRequestQueue(this);
         String jsonURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20in%20('AAPL'%2C'GOOG'%2C'MSFT')&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
@@ -142,11 +158,11 @@ public class ListTesting extends AppCompatActivity {
 
                         for (int i = 0; i < results.length(); i++) {
                             JSONObject symbolDetail = (JSONObject) results.get(i);
-                            quotes.add(symbolDetail.getString("Name"));
-                            subText.add(symbolDetail.getString("Symbol"));
+                            quotes.add(symbolDetail.getString("Symbol"));
+                            subText.add(symbolDetail.getString("Change"));
                         }
 
-                        events = (ListView) findViewById(R.id.mylist);
+                        events = (ListView) findViewById(R.id.refreshlist);
                         String[] from = { "top", "bottom" };
                         int[] to = { android.R.id.text1, android.R.id.text2 };
 
@@ -154,13 +170,15 @@ public class ListTesting extends AppCompatActivity {
 
                         try {
                             adapterItems = listTwoItems(
-                                quotes.toArray(new String[quotes.size()]),
-                                subText.toArray(new String[subText.size()])
+                                    quotes.toArray(new String[quotes.size()]),
+                                    subText.toArray(new String[subText.size()])
                             );
 
                             SimpleAdapter adapter = new SimpleAdapter(current, adapterItems, android.R.layout.simple_list_item_2, from, to);
                             events.setAdapter(adapter);
-
+                            if (swipeRefreshLayout.isRefreshing()) {
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
                         } catch (Exception e) {
                             // do nothing
                             Log.d("ListTesting", e.getMessage());
@@ -174,12 +192,17 @@ public class ListTesting extends AppCompatActivity {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getApplicationContext(), "An error occurred", Toast.LENGTH_SHORT);
+                    if (swipeRefreshLayout.isRefreshing()) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
                     Log.e("Volley", "Error");
                 }
             }
         );
 
         requestQueue.add(request);
+
     }
 
     private ArrayList<Map<String, String>> listCustomItems(String[] top, String[] bottom) throws Exception {
