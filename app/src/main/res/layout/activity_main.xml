@@ -40,4 +40,14 @@
         android:layout_alignParentStart="true"
         android:layout_marginTop="16dp"
         android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="Async Simple List"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/list_view_button_3"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="22dp"
+        android:id="@+id/simple_async_list_button"
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

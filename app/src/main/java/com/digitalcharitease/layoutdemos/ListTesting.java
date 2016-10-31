@@ -1,34 +1,33 @@
 package com.digitalcharitease.layoutdemos;
-
-import android.Manifest;
-import android.content.ContentResolver;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.CalendarContract;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.ListViewAutoScrollHelper;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static android.R.id.list;
-
 public class ListTesting extends AppCompatActivity {
     private final int MY_PERMISSIONS_REQUEST_READ_CALENDAR = 1;
-    ListView events;
+    private ListView events;
+    RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +46,9 @@ public class ListTesting extends AppCompatActivity {
                 break;
             case 3:
                 this.listItemsCustom();
+                break;
+            case 4:
+                this.asyncSimpleList();
                 break;
             default:
                 this.listItemsSimpleOne();
@@ -92,7 +94,7 @@ public class ListTesting extends AppCompatActivity {
     private void listItemsCustom() {
         events = (ListView) findViewById(R.id.mylist);
         String[] items = new String[] {"one", "two", "three"};
-        String[] subItems = new String[] {"under one lorem ips", "under two", "under three"};
+        String[] subItems = new String[] {"under one lorem ipsum here is some extra long text blah blah blah", "under two", "under three"};
         String[] from = { "title", "description" };
         int[] to = { R.id.title, R.id.description };
 
@@ -101,12 +103,83 @@ public class ListTesting extends AppCompatActivity {
         try {
             adapterItems = listCustomItems(items, subItems);
             SimpleAdapter adapter = new SimpleAdapter(this, adapterItems, R.layout.row, from, to);
-            events.setAdapter(adapter);
 
+            events.setOnItemClickListener((parent, view, p, id) -> {
+                Toast.makeText(getApplicationContext(), "On click", Toast.LENGTH_LONG).show();
+
+            });
+
+            events.setOnItemLongClickListener((parent, view, p, id) -> {
+                Toast.makeText(getApplicationContext(), "On long click", Toast.LENGTH_LONG).show();
+                return true;
+            });
+
+            events.setAdapter(adapter);
         } catch (Exception e) {
             // do nothing
             Log.d("ListTesting", e.getMessage());
         }
+    }
+
+    private void asyncSimpleList() {
+        final Context current = this;
+        requestQueue = Volley.newRequestQueue(this);
+        String jsonURL = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20in%20('AAPL'%2C'GOOG'%2C'MSFT')&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, jsonURL,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        JSONObject obj = response
+                                .getJSONObject("query")
+                                .getJSONObject("results");
+
+                        JSONArray results = obj.getJSONArray("quote");
+
+                        ArrayList<String> quotes = new ArrayList<>();
+                        ArrayList<String> subText = new ArrayList<>();
+
+                        for (int i = 0; i < results.length(); i++) {
+                            JSONObject symbolDetail = (JSONObject) results.get(i);
+                            quotes.add(symbolDetail.getString("Name"));
+                            subText.add(symbolDetail.getString("Symbol"));
+                        }
+
+                        events = (ListView) findViewById(R.id.mylist);
+                        String[] from = { "top", "bottom" };
+                        int[] to = { android.R.id.text1, android.R.id.text2 };
+
+                        ArrayList<Map<String, String>> adapterItems;
+
+                        try {
+                            adapterItems = listTwoItems(
+                                quotes.toArray(new String[quotes.size()]),
+                                subText.toArray(new String[subText.size()])
+                            );
+
+                            SimpleAdapter adapter = new SimpleAdapter(current, adapterItems, android.R.layout.simple_list_item_2, from, to);
+                            events.setAdapter(adapter);
+
+                        } catch (Exception e) {
+                            // do nothing
+                            Log.d("ListTesting", e.getMessage());
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e("Volley", "Error");
+                }
+            }
+        );
+
+        requestQueue.add(request);
     }
 
     private ArrayList<Map<String, String>> listCustomItems(String[] top, String[] bottom) throws Exception {

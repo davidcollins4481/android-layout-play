@@ -11,6 +11,7 @@ public class MainActivity extends AppCompatActivity {
     Button listViewButtonOne;
     Button listViewButtonTwo;
     Button listViewButtonThree;
+    Button listViewButtonFour;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,24 +21,29 @@ public class MainActivity extends AppCompatActivity {
         listViewButtonOne = (Button) findViewById(R.id.list_view_button_1);
         listViewButtonTwo = (Button) findViewById(R.id.list_view_button_2);
         listViewButtonThree = (Button) findViewById(R.id.list_view_button_3);
-
-        final Context current = this;
+        listViewButtonFour = (Button) findViewById(R.id.simple_async_list_button);
 
         listViewButtonOne.setOnClickListener((v) -> {
-            Intent intent = new Intent(current, ListTesting.class);
+            Intent intent = new Intent(getApplicationContext(), ListTesting.class);
             intent.putExtra("type", 1);
             startActivity(intent);
         });
 
         listViewButtonTwo.setOnClickListener((v) -> {
-            Intent intent = new Intent(current, ListTesting.class);
+            Intent intent = new Intent(getApplicationContext(), ListTesting.class);
             intent.putExtra("type", 2);
             startActivity(intent);
         });
 
         listViewButtonThree.setOnClickListener((v) -> {
-            Intent intent = new Intent(current, ListTesting.class);
+            Intent intent = new Intent(getApplicationContext(), ListTesting.class);
             intent.putExtra("type", 3);
+            startActivity(intent);
+        });
+
+        listViewButtonFour.setOnClickListener((v) -> {
+            Intent intent = new Intent(getApplicationContext(), ListTesting.class);
+            intent.putExtra("type", 4);
             startActivity(intent);
         });
     }
